@@ -6,6 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Home, RefreshCw, XCircle } from "lucide-react";
 import Link from "next/link";
 
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
 const mockReviewData = [
   {
     question: "What is the capital of France?",
@@ -13,17 +16,29 @@ const mockReviewData = [
     userAnswer: "Paris",
     correctAnswer: "Paris",
   },
-  {
-    question: "Which planet is known as the Red Planet?",
-    isCorrect: false,
-    userAnswer: "Jupiter",
-    correctAnswer: "Mars",
-  },
 ];
 
 export default function ResultsPage() {
-  const score = 8;
-  const total = 10;
+  const searchParams = useSearchParams();
+  const [score, setScore] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [reviewData, setReviewData] = useState<any[]>(mockReviewData);
+
+  useEffect(() => {
+    const scoreParam = searchParams.get("score");
+    const totalParam = searchParams.get("total");
+    const dataParam = searchParams.get("data");
+
+    if (scoreParam) setScore(parseInt(scoreParam));
+    if (totalParam) setTotal(parseInt(totalParam));
+    if (dataParam) {
+      try {
+        setReviewData(JSON.parse(decodeURIComponent(dataParam)));
+      } catch (err) {
+        console.error("Failed to parse review data:", err);
+      }
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-12 flex flex-col max-w-4xl mx-auto space-y-12">

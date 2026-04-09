@@ -1,25 +1,36 @@
 "use client";
 
-import { useState } from "react";
 import { Flashcard } from "@/components/Flashcard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Brain } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-const mockFlashcards = [
+const defaultMockCards = [
   { front: "What is React?", back: "A JavaScript library for building user interfaces." },
-  { front: "What is Next.js?", back: "A React framework for production-grade applications." },
-  { front: "What is Tailwind CSS?", back: "A utility-first CSS framework." },
-  { front: "What is TypeScript?", back: "A typed superset of JavaScript." },
-  { front: "What is Shadcn UI?", back: "A collection of re-usable components built with Radix UI and Tailwind CSS." },
 ];
 
 export default function FlashcardPage() {
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [cards, setCards] = useState<any[]>(defaultMockCards);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const data = searchParams.get("data");
+    if (data) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(data));
+        setCards(decoded);
+      } catch (err) {
+        console.error("Failed to parse flashcard data:", err);
+      }
+    }
+  }, [searchParams]);
 
   const handleNext = () => {
-    if (currentIdx < mockFlashcards.length - 1) {
+    if (currentIdx < cards.length - 1) {
       setCurrentIdx(currentIdx + 1);
     }
   };
@@ -35,7 +46,7 @@ export default function FlashcardPage() {
       {/* Top Header - Numbered Tabs */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex gap-2 bg-card p-2 border-2 rounded-2xl overflow-x-auto w-full md:w-auto scrollbar-hide">
-          {mockFlashcards.map((_, index) => (
+          {cards.map((_: any, index: number) => (
             <Button
               key={index}
               variant={currentIdx === index ? "default" : "ghost"}
@@ -60,8 +71,8 @@ export default function FlashcardPage() {
       {/* Flashcard Area */}
       <div className="flex-1 flex items-center justify-center py-8">
         <Flashcard
-          front={mockFlashcards[currentIdx].front}
-          back={mockFlashcards[currentIdx].back}
+          front={cards[currentIdx].front}
+          back={cards[currentIdx].back}
         />
       </div>
 
@@ -82,7 +93,7 @@ export default function FlashcardPage() {
           size="lg"
           className="rounded-xl px-8 font-bold"
           onClick={handleNext}
-          disabled={currentIdx === mockFlashcards.length - 1}
+          disabled={currentIdx === cards.length - 1}
         >
           Next
           <ArrowRight className="h-5 w-5 ml-2" />

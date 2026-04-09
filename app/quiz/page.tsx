@@ -1,45 +1,59 @@
 "use client";
 
-import { useState } from "react";
 import { QuizQuestion } from "@/components/QuizQuestion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Zap } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-const mockQuizData = {
-  questions: [
-    {
-      id: 1,
-      text: "What is the capital of France?",
-      options: ["London", "Paris", "Berlin", "Madrid"],
-      correct: "Paris",
-    },
-    {
-      id: 2,
-      text: "Which planet is known as the Red Planet?",
-      options: ["Venus", "Mars", "Jupiter", "Saturn"],
-      correct: "Mars",
-    },
-    // Adding more mock questions if needed, but 2 is enough for frontend demo
-  ],
-};
+const defaultMockData = [
+  {
+    id: 1,
+    text: "What is the capital of France?",
+    options: ["A. London", "B. Paris", "C. Berlin", "D. Madrid"],
+    correctIndex: 1,
+  },
+];
 
 export default function QuizPage() {
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [questions, setQuestions] = useState<any[]>(defaultMockData);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const totalQuestions = mockQuizData.questions.length;
+  useEffect(() => {
+    const data = searchParams.get("data");
+    if (data) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(data));
+        setQuestions(decoded.map((q: any, index: number) => ({ ...q, id: index })));
+      } catch (err) {
+        console.error("Failed to parse quiz data:", err);
+      }
+    }
+  }, [searchParams]);
+
+  const totalQuestions = questions.length;
   const progress = ((currentIdx + 1) / totalQuestions) * 100;
-  const currentQuestion = mockQuizData.questions[currentIdx];
+  const currentQuestion = questions[currentIdx];
 
   const handleNext = () => {
     if (currentIdx < totalQuestions - 1) {
       setCurrentIdx(currentIdx + 1);
     } else {
-      router.push("/results");
+      // Compute results and redirect
+      const reviewData = questions.map((q) => ({
+        question: q.text,
+        isCorrect: answers[q.id] === q.options[q.correctIndex],
+        userAnswer: answers[q.id] || "No answer",
+        correctAnswer: q.options[q.correctIndex],
+      }));
+      const score = reviewData.filter((r) => r.isCorrect).length;
+      const encodedData = encodeURIComponent(JSON.stringify(reviewData));
+      router.push(`/results?score=${score}&total=${totalQuestions}&data=${encodedData}`);
     }
   };
 

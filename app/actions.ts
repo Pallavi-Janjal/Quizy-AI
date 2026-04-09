@@ -7,12 +7,23 @@ import mammoth from "mammoth";
 
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   return new Promise((resolve, reject) => {
-    const pdfParser = new PDFParser(null, 1);
-    pdfParser.on("pdfParser_dataError", (errData: any) => reject(errData.parserError));
+    // Note: PDFParser constructor params vary by version, v2+ usually takes (this, suppressLayer)
+    const pdfParser = new (PDFParser as any)(null, 1);
+    
+    pdfParser.on("pdfParser_dataError", (errData: any) => {
+      console.error("PDF Parsing Error:", errData);
+      reject(new Error(errData?.parserError || "Failed to parse PDF"));
+    });
+    
     pdfParser.on("pdfParser_dataReady", () => {
       resolve(pdfParser.getRawTextContent());
     });
-    pdfParser.parseBuffer(buffer);
+    
+    try {
+      pdfParser.parseBuffer(buffer);
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 

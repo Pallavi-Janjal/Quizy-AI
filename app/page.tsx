@@ -32,7 +32,11 @@ export default function Home() {
     
     try {
       await generateContent(formData);
-    } catch (error) {
+    } catch (error: any) {
+      // In Next.js, redirect throws a special error. We should ignore it or check for it.
+      if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+        return;
+      }
       console.error("failed to generate:", error);
       alert("Failed to generate content. Please try again.");
     } finally {

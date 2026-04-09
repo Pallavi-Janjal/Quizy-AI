@@ -6,7 +6,10 @@ interface ScoreCircleProps {
 }
 
 export function ScoreCircle({ score, total }: ScoreCircleProps) {
-  const percentage = (score / total) * 100;
+  const safeTotal = isNaN(total) || total <= 0 ? 1 : total;
+  const safeScore = isNaN(score) ? 0 : score;
+  
+  const percentage = (safeScore / safeTotal) * 100;
   const radius = 45;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;

@@ -3,40 +3,17 @@
 import { History, UserCircle, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const mockHistory = [
-  "React Hooks Explained",
-  "Next.js App Router Tips",
-  "Tailwind CSS Layouts",
-  "TypeScript Generics Guide",
-  "Web Performance Optimization",
-];
+import { HistoryList } from "@/components/HistoryList";
 
 export function Sidebar() {
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-card text-card-foreground transition-all duration-300">
       <div className="p-6">
-        <h2 className="text-xl font-bold tracking-tight">Quizzy AI</h2>
+        <h1 className="text-xl font-bold tracking-tight">Quizzy AI</h1>
       </div>
       
-      <div className="px-4 py-2">
-        <div className="flex items-center gap-2 px-2 text-sm font-semibold text-muted-foreground">
-          <History className="h-4 w-4" />
-          History
-        </div>
-      </div>
-      
-      <div className="flex-1 overflow-y-auto px-4 scrollbar-hide">
-        <div className="space-y-1">
-          {mockHistory.map((item, index) => (
-            <Button
-              key={index}
-              variant="ghost"
-              className="w-full justify-start truncate text-sm font-normal"
-            >
-              {item}
-            </Button>
-          ))}
-        </div>
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <HistoryList />
       </div>
 
       <div className="mt-auto p-4 space-y-2">

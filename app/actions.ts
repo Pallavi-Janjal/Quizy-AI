@@ -4,6 +4,11 @@ import { generateQuizOrFlashcard } from "@/lib/ai";
 import { redirect } from "next/navigation";
 import PDFParser from "pdf2json";
 import mammoth from "mammoth";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/convex/_generated/api.js";
+
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+const convex = convexUrl ? new ConvexHttpClient(convexUrl) : null;
 
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -39,9 +44,11 @@ export async function generateContent(formData: FormData) {
   const count = 10;
 
   let contentToProcess = notes || "";
+  let topic = "Untitled Session";
 
   if (file && file.size > 0) {
     const buffer = Buffer.from(await file.arrayBuffer());
+    topic = file.name.replace(/\.[^/.]+$/, "");
     if (file.name.endsWith(".pdf")) {
       contentToProcess += "\n" + (await extractTextFromPDF(buffer));
     } else if (file.name.endsWith(".docx")) {
@@ -49,6 +56,8 @@ export async function generateContent(formData: FormData) {
     } else if (file.name.endsWith(".txt")) {
       contentToProcess += "\n" + buffer.toString("utf-8");
     }
+  } else if (notes) {
+    topic = notes.slice(0, 30) + (notes.length > 30 ? "..." : "");
   }
 
   if (!contentToProcess.trim()) {
@@ -56,7 +65,20 @@ export async function generateContent(formData: FormData) {
   }
 
   const data = await generateQuizOrFlashcard(contentToProcess, mode, count);
-  const encodedData = encodeURIComponent(JSON.stringify(data));
 
+  // Save to Convex history
+  if (convex) {
+    try {
+      await convex.mutation(api.history.saveHistory, {
+        topic,
+        mode,
+        data,
+      });
+    } catch (err) {
+      console.error("Failed to save history to Convex:", err);
+    }
+  }
+
+  const encodedData = encodeURIComponent(JSON.stringify(data));
   redirect(`/${mode}?data=${encodedData}`);
 }

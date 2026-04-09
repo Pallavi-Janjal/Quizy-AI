@@ -11,8 +11,8 @@ import { useEffect, useState } from "react";
 const defaultMockData = [
   {
     id: 1,
-    text: "What is the capital of France?",
-    options: ["A. London", "B. Paris", "C. Berlin", "D. Madrid"],
+    question: "What is the capital of France?",
+    options: ["London", "Paris", "Berlin", "Madrid"],
     correctIndex: 1,
   },
 ];
@@ -46,7 +46,7 @@ export default function QuizPage() {
     } else {
       // Compute results and redirect
       const reviewData = questions.map((q) => ({
-        question: q.text,
+        question: q.question,
         isCorrect: answers[q.id] === q.options[q.correctIndex],
         userAnswer: answers[q.id] || "No answer",
         correctAnswer: q.options[q.correctIndex],
@@ -85,7 +85,7 @@ export default function QuizPage() {
       {/* Question area */}
       <div className="flex-1 flex items-center justify-center py-8">
         <QuizQuestion
-          question={currentQuestion.text}
+          question={currentQuestion.question}
           options={currentQuestion.options}
           selectedOption={answers[currentQuestion.id]}
           onSelect={(option) => 

@@ -63,7 +63,7 @@ export default function ResultsPage() {
       <div className="space-y-4">
         <h3 className="text-xl font-semibold px-2">Review Answers</h3>
         <div className="space-y-4">
-          {mockReviewData.map((item, index) => (
+          {reviewData.map((item, index) => (
             <Card key={index} className="border-2 shadow-none overflow-hidden">
               <CardContent className="p-6 flex items-start gap-4">
                 {item.isCorrect ? (

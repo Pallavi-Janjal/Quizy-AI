@@ -29,12 +29,13 @@ If mode is "quiz", return exactly ${count} multiple-choice questions in this for
   "questions": [
     {
       "question": "string",
-      "options": ["A. choice", "B. choice", "C. choice", "D. choice"],
+      "options": ["choice1", "choice2", "choice3", "choice4"],
       "correctIndex": 0-3,
       "explanation": "string"
     }
   ]
 }
+Note: options should contain ONLY plain answer text. Do NOT add prefixes like "A. " or "1. ".
 
 If mode is "flashcard", return exactly ${count} flashcards in this format:
 {
